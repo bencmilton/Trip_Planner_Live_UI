@@ -1,14 +1,15 @@
 $(document).ready(function(){
-	
 
 
-	$('.panel-body').on('click', 'button', function () {
+// Add hotels, restaurants, and things to itinerary //
+
+	$('#pick_me').on('click', 'button', function () {
 		$button = $(this);
 		$select = $button.siblings('select');
 		$type = $button.siblings('h4');
 
 		if ($type.text() === 'Hotels'){
-			//console.log('!!!!',hotelLocation);
+
 			if ($("#hotels-list span").length === 1){
 				$('#hotels-list div').remove()
 			};
@@ -30,16 +31,84 @@ $(document).ready(function(){
 			} else {
 				$('#things-list').append('<div class="itinerary-item"><span class="title">'+$select.val()+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
 			}
-		}				
+		}
+
+		initialize_gmaps(populate_locations());				
 	});
 
-	
-    initialize_gmaps();
-     
+// Remove hotels, restaurants, and things to itinerary
+
+	$('#itinerary').on('click', 'button', function () {
+		$button = $(this);
+		$div = $button.parent('div');
+
+		$div.remove();
+
+		initialize_gmaps(populate_locations());
+
+	});	
+
+    initialize_gmaps(populate_locations());
 
 });
 
-function initialize_gmaps() {
+function populate_locations(){
+	//console.log(all_restaurants);
+
+    var hotelLocation = "";
+    var restaurantLocations = [];
+    var thingToDoLocations = [];
+
+$("#hotels-list span").each(function(index, element){
+	hotelLocation = $(this).text();
+});
+if (hotelLocation !== ""){
+	hotelLocation = all_hotels.filter(function(elObj){
+		if(elObj.name == hotelLocation){
+			return true;
+		}
+		return false;
+	})[0].place[0].location;
+}
+	
+	
+$("#restaurants-list span").each(function(index, element){
+	restaurantLocations.push( $(this).text() );
+});
+	
+	restaurantLocations = restaurantLocations.map(function(el){
+			return all_restaurants.filter(function(elObj){
+				if(elObj.name == el){
+					return true;
+				}
+				return false;
+			})[0].place[0].location;
+	});
+
+$("#things-list span").each(function(index, element){
+	thingToDoLocations.push( $(this).text() );
+});
+	
+	thingToDoLocations = thingToDoLocations.map(function(el){
+			return all_things_to_do.filter(function(elObj){
+				if(elObj.name == el){
+					return true;
+				}
+				return false;
+			})[0].place[0].location;
+	});
+
+return [hotelLocation, restaurantLocations, thingToDoLocations]
+
+};
+
+
+
+function initialize_gmaps(arr) {
+		var hotelLocation = arr[0]; 
+		var restaurantLocations = arr[1]; 
+		var thingToDoLocations = arr[2];
+
         // initialize new google maps LatLng object
         var myLatlng = new google.maps.LatLng(40.705189,-74.009209);
         // set the map options hash
@@ -58,10 +127,6 @@ function initialize_gmaps() {
           position: myLatlng,
           title:"Hello World!"
         });
-
-        var hotelLocation = [];
-        var restaurantLocations = [];
-        var thingToDoLocations = [];
 
         function drawLocation (location, opts) {
           if (typeof opts !== 'object') opts = {};
