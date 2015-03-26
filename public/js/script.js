@@ -10,26 +10,27 @@ $(document).ready(function(){
 
 		if ($type.text() === 'Hotels'){
 
-			if ($("#hotels-list span").length === 1){
-				$('#hotels-list div').remove()
+			if ($(".itinerary.current-day #hotels-list span").length === 1){
+				$('.itinerary.current-day #hotels-list div').remove()
 			};
-			$('#hotels-list').append('<div class="itinerary-item"><span class="title">'+$select.val()+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
+			$('.itinerary.current-day #hotels-list').append('<div class="itinerary-item"><span class="title">'+$select.val()+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
 			
 		}
 
 		if ($type.text() === 'Restaurants'){
-			if ($("#restaurants-list span").text().indexOf($select.val()) > -1 ){
+			if ($(".itinerary.current-day #restaurants-list span").text().indexOf($select.val()) > -1 ){
 				return;
 			} else {
-				$('#restaurants-list').append('<div class="itinerary-item"><span class="title">'+$select.val()+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
+				$('.itinerary.current-day #restaurants-list').append('<div class="itinerary-item"><span class="title">'+$select.val()+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
 			}
 		}
 
 		if ($type.text() === 'Things To Do'){
-			if ($("#things-list span").text().indexOf($select.val()) > -1 ){
+			if ($(".itinerary.current-day #things-list span").text().indexOf($select.val()) > -1 ){
 				return;
 			} else {
-				$('#things-list').append('<div class="itinerary-item"><span class="title">'+$select.val()+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
+				console.log($(".itinerary.current-day #things-list span").text());
+				$('.itinerary.current-day #things-list').append('<div class="itinerary-item"><span class="title">'+$select.val()+'</span><button class="btn btn-xs btn-danger remove btn-circle">x</button></div>');
 			}
 		}
 
@@ -38,7 +39,8 @@ $(document).ready(function(){
 
 // Remove hotels, restaurants, and things to itinerary
 
-	$('#itinerary').on('click', 'button', function () {
+	$('#itin_body').on('click', 'button', function () {
+
 		$button = $(this);
 		$div = $button.parent('div');
 
@@ -47,6 +49,44 @@ $(document).ready(function(){
 		initialize_gmaps(populate_locations());
 
 	});	
+
+// Add-a-day button
+
+	$("#add-day-btn").on('click', function(){
+		$currentDay = ' .day-' + $(".day-buttons").find(".current-day").text();
+		$dayLength = $('.day-buttons button').length;	
+
+		$(body_clone).appendTo('#itin_body');
+
+		$('<button class="btn btn-circle day-btn">'+$dayLength+'</button>').insertAfter(".day-buttons button:nth-last-child(2)");
+		$(".day-buttons button:nth-last-child(2)").trigger("click");
+
+	});
+
+// Switch day
+	$(".day-buttons").on("click", "button", function(){
+		$button = $(this);
+		if(!$button.is("#add-day-btn")){
+			
+			//change colors
+			$(".day-buttons").find("button.current-day").removeClass("current-day");
+			$button.addClass("current-day");
+			$current = $("button.current-day").text();
+			$('#day-title span').text('Day '+ $current);
+			
+			//hides prev current day
+			$("div.current-day").removeClass("current-day").toggle();
+
+			//shows the new current day
+			$("#itin_body .itinerary:nth-child("+ $current + ")").addClass("current-day").toggle();
+
+			initialize_gmaps(populate_locations());
+
+		}
+
+	});
+
+// Delete day	
 
     initialize_gmaps(populate_locations());
 
@@ -59,7 +99,7 @@ function populate_locations(){
     var restaurantLocations = [];
     var thingToDoLocations = [];
 
-$("#hotels-list span").each(function(index, element){
+$(".itinerary.current-day #hotels-list span").each(function(index, element){
 	hotelLocation = $(this).text();
 });
 if (hotelLocation !== ""){
@@ -72,7 +112,7 @@ if (hotelLocation !== ""){
 }
 	
 	
-$("#restaurants-list span").each(function(index, element){
+$(".itinerary.current-day #restaurants-list span").each(function(index, element){
 	restaurantLocations.push( $(this).text() );
 });
 	
@@ -85,7 +125,7 @@ $("#restaurants-list span").each(function(index, element){
 			})[0].place[0].location;
 	});
 
-$("#things-list span").each(function(index, element){
+$(".itinerary.current-day #things-list span").each(function(index, element){
 	thingToDoLocations.push( $(this).text() );
 });
 	
@@ -215,6 +255,7 @@ function initialize_gmaps(arr) {
         }
       ];
 
+var body_clone = '<div class="itinerary current-day"><div><h4>My Hotel</h4><ul id="hotels-list" class="list-group"></ul></div><div><h4>My Restaurants</h4><ul id="restaurants-list" class="list-group"></ul></div><div><h4>My Things To Do</h4><ul id="things-list" class="list-group"></ul></div></div>';
 
 
 
